@@ -16,56 +16,48 @@ namespace YourProjectName
         Dictionary<string, NetString> floors = new Dictionary<string, NetString>();
         Dictionary<string, NetString> wallpapers = new Dictionary<string, NetString>();
 
-        private void Print(string e)
-        {
-            this.Monitor.Log(e, LogLevel.Debug);
-        }
-
         public override void Entry(IModHelper helper)
         {
-            Helper.Events.GameLoop.SaveLoaded += this.OnLocationListChanged;
-            Helper.Events.Player.Warped += this.OnLocationListChanged;
+            Helper.Events.GameLoop.SaveLoaded += this.OnLocationChanged;
+            Helper.Events.Player.Warped += this.OnLocationChanged;
             Helper.Events.Player.InventoryChanged += this.GetUsedDecorationAndRetrieve;
         }
 
-        private void GetUsedDecorationAndRetrieve(object? sender, InventoryChangedEventArgs e)
+        private void GetUsedDecorationAndRetrieve(object? sender, InventoryChangedEventArgs eventArgs)
         {
-            if (!e.IsLocalPlayer) return;
-
-            DecoratableLocation location = (DecoratableLocation)Game1.player.currentLocation;
-            if (!location.GetType().IsSubclassOf(typeof(DecoratableLocation))) return;
+            if (!eventArgs.IsLocalPlayer) return;
 
             List<Item> usedDecorations = new List<Item>();
-            foreach (Item item in e.Removed)
+            foreach (Item item in eventArgs.Removed)
             {
                 if (item.Name == "Wallpaper" || item.Name == "Flooring") usedDecorations.Add(item);
             }
-
             if (usedDecorations.Count < 1) return;
 
-            
+            var locationOnInventoryChange = Game1.player.currentLocation;
+            if (!locationOnInventoryChange.GetType().IsSubclassOf(typeof(DecoratableLocation))) return;
+            DecoratableLocation currentDecoratableLocation = (DecoratableLocation)locationOnInventoryChange;
 
             foreach(Item item in usedDecorations)
             {
                 if (item.Name == "Wallpaper")
                 {
-                    var difference = this.wallpapers.Except(location.appliedWallpaper.FieldDict);
-                    foreach (var item2 in difference) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(item2.Value), false));
-                    this.SaveWallpapers(location);
+                    var differences = this.wallpapers.Except(currentDecoratableLocation.appliedWallpaper.FieldDict);
+                    foreach (var difference in differences) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(difference.Value), false));
+                    this.SaveWallpapers(currentDecoratableLocation);
 
                 }
 
                 if (item.Name == "Flooring")
                 {
-                    var difference = this.floors.Except(location.appliedFloor.FieldDict);
-                    foreach (var item2 in difference) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(item2.Value), true));
-                    this.SaveFloors(location);
+                    var differences = this.floors.Except(currentDecoratableLocation.appliedFloor.FieldDict);
+                    foreach (var difference in differences) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(difference.Value), true));
+                    this.SaveFloors(currentDecoratableLocation);
                 }
             }
         }
 
-
-        private void OnLocationListChanged(object? sender, EventArgs e)
+        private void OnLocationChanged(object? sender, EventArgs e)
         {
             // ignore if player hasn't loaded a save yet
             if (!Context.IsWorldReady)
