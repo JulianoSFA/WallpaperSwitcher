@@ -1,7 +1,7 @@
 {
   "Name": "Wallpaper Switcher",
   "Author": "Pikachu de Bigode",
-  "Version": "0.0.1",
+  "Version": "1.0.0",
   "Description": "A mod that returns the current wallpaper when you change it",
   "UniqueID": "PikachuDeBigode.WallpaperSwitcher",
   "EntryDll": "WallpaperSwitcher.dll",
