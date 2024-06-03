@@ -43,7 +43,18 @@ namespace YourProjectName
                 if (item.Name == "Wallpaper")
                 {
                     var differences = this.wallpapers.Except(currentDecoratableLocation.appliedWallpaper.FieldDict);
-                    foreach (var difference in differences) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(difference.Value), false));
+                    foreach (var difference in differences)
+                    {
+                        string[] id_info = difference.Value.Value.Split(':');
+                        if (id_info.Length == 2)
+                        {
+                            Game1.player.addItemToInventory(new Wallpaper(id_info[0], Int32.Parse(id_info[1])));
+                        }
+                        else
+                        {
+                            Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(id_info[0]), false));
+                        }
+                    }
                     this.SaveWallpapers(currentDecoratableLocation);
 
                 }
@@ -51,7 +62,18 @@ namespace YourProjectName
                 if (item.Name == "Flooring")
                 {
                     var differences = this.floors.Except(currentDecoratableLocation.appliedFloor.FieldDict);
-                    foreach (var difference in differences) Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(difference.Value), true));
+                    foreach (var difference in differences)
+                    {
+                        string[] id_info = difference.Value.Value.Split(':');
+                        if (id_info.Length == 2)
+                        {
+                            Game1.player.addItemToInventory(new Wallpaper(id_info[0], Int32.Parse(id_info[1])));
+                        }
+                        else
+                        {
+                            Game1.player.addItemToInventory(new Wallpaper(Int32.Parse(id_info[0]), true));
+                        }
+                    }
                     this.SaveFloors(currentDecoratableLocation);
                 }
             }
